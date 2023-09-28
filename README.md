@@ -2,6 +2,11 @@
 
 This is a living document. To process was tested on a mac with Go1.20 installed.
 
+0. Clone
+```
+git clone --recursive https://github.com/rzmahmood/ethereum-pos-testnet.git
+```
+
 1. Build dependencies. This includes Go-Ethereum and Prysm
 ```
 ./build-dependencies
