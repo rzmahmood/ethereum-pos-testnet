@@ -23,6 +23,7 @@ geth_pw_file="$NETWORK_DIR/geth_password.txt"
 echo "" > "$geth_pw_file"
 
 cp ./config.yml $NETWORK_DIR/consensus/config.yml
+cp ./genesis.json $NETWORK_DIR/execution/genesis.json
 
 $GETH_BINARY account new --datadir "$NETWORK_DIR/execution" --password "$geth_pw_file"
 
