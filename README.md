@@ -14,7 +14,7 @@
 
 This deployment process allows you to setup and deploy your own local ethereum PoS networks with multiple nodes.
 This repository is targeted to developers who want to quickly modify client source code and deploy a PoS network.
-This setup can is can serve as a reference for building your own production deployments but better solutions exist for [that](https://docs.kurtosis.com/how-to-compose-your-own-testnet/) use case.
+This setup can is can serve as a reference for building your own production deployments but better solutions exist for [that](https://docs.kurtosis.com/how-to-compose-your-own-testnet/) use case. I'm personally using this for simulating reorgs and byzantine behaviour.
 
 
 ## Installation
@@ -34,7 +34,7 @@ A helper script that builds the submodules, saving the binaries in a known path
 
 ## Running
 
-Start testnet. This will start a test with a single validator. You should expect blocks to be produced. Logs are stored in `./network/node-*/logs`
+Start testnet. This will start a test with a two validators. You should expect blocks to be produced. Logs are stored in `./network/node-*/logs`
 The script is idempotent and will clean up every time it is restarted.
 ```bash
 ./testnet.sh
@@ -71,6 +71,23 @@ You can change the number of nodes to run by changing this line in `./testnet.sh
 NUM_NODES=2
 ```
 
+If you want to try submitting transactions, add your address to the `alloc` field in `./genesis.json` before running the testnet. This will premine your address some funds.
+```json
+"alloc": {
+    // Replace with your address
+    "123463a4b065722e99115d6c222f267d9cabb524": {
+        "balance": "0x43c33c1937564800000"
+    },
+```
+You can then send transactions using [cast](https://book.getfoundry.sh/cast/) while the network is running
+```bash
+# Get balance of an address
+cast balance -r localhost:8000 0xFe8664457176D0f87EAaBd103ABa410855F81010
+
+# Send 0.01 ether to 0x8D...8E
+cast send -r localhost:8000 --private-key $PKEY 0x8D512169343cc6e108a8bB6ec5bc116C416eFc8E --value 0.01ether
+```
+
 Reach out to me on Twitter [@0xZorz](https://twitter.com/0xZorz) if you have any issues. DMs are open
 
 ## Coming Soon
@@ -79,4 +96,4 @@ Reach out to me on Twitter [@0xZorz](https://twitter.com/0xZorz) if you have any
 
 ## Acknowledgements
 
-- The [work](https://github.com/OffchainLabs/eth-pos-devnet) of Raul Jordan was a great reference starting point. His setup will suffice requirements that don't demand signficant customization
+- The [work](https://github.com/OffchainLabs/eth-pos-devnet) of Raul Jordan was a great reference starting point. His setup will suffice requirements that don't demand signficant customization and only require 1 node.
