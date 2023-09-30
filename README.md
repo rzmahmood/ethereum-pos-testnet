@@ -60,7 +60,7 @@ Alternatively, you can use the built version of geth
 > eth.blockNumber
 ```
 
-You can also interact a beacon node you spin up
+You can also interact with a beacon node you spin up
 ```bash
 curl localhost:4100/eth/v1/node/identity
 ```

@@ -185,7 +185,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --p2p-tcp-port=$((PRYSM_BEACON_P2P_TCP_PORT + i)) \
       --p2p-udp-port=$((PRYSM_BEACON_P2P_UDP_PORT + i)) \
       --monitoring-port=$((PRYSM_BEACON_MONITORING_PORT + i)) \
-      --verbosity=trace \
+      --verbosity=info \
       --enable-debug-rpc-endpoints > "$NODE_DIR/logs/beacon.log" 2>&1 &
 
     # Start prysm validator for this node
