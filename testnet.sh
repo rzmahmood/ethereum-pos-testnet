@@ -68,8 +68,8 @@ PRYSM_CTL_BINARY=./dependencies/prysm/out/prysmctl
 PRYSM_BEACON_BINARY=./dependencies/prysm/out/beacon-chain
 PRYSM_VALIDATOR_BINARY=./dependencies/prysm/out/validator
 
-# Create the bootnode for peer discovery. 
-# Not a production grade bootnode
+# Create the bootnode for execution client peer discovery. 
+# Not a production grade bootnode. Does not do peer discovery for consensus client
 mkdir -p $NETWORK_DIR/bootnode
 
 $GETH_BOOTNODE_BINARY -genkey $NETWORK_DIR/bootnode/nodekey
@@ -102,7 +102,7 @@ $PRYSM_CTL_BINARY testnet generate-genesis \
 
 
 # The prysm bootstrap node is set after the first loop, as the first
-# node is the bootstrap node.
+# node is the bootstrap node. This is used for consensus client discovery
 PRYSM_BOOTSTRAP_NODE=
 
 # Calculate how many nodes to wait for to be in sync with. Not a hard rule
@@ -116,10 +116,12 @@ for (( i=0; i<$NUM_NODES; i++ )); do
     mkdir -p $NODE_DIR/consensus
     mkdir -p $NODE_DIR/logs
 
+    # We use an empty password. Do not do this in production
     geth_pw_file="$NODE_DIR/geth_password.txt"
     echo "" > "$geth_pw_file"
 
     # Copy the same genesis and inital config the node's directories
+    # All nodes must have the same genesis otherwise they will reject eachother
     cp ./config.yml $NODE_DIR/consensus/config.yml
     cp $NETWORK_DIR/genesis.ssz $NODE_DIR/consensus/genesis.ssz
     cp $NETWORK_DIR/genesis.json $NODE_DIR/execution/genesis.json
@@ -127,12 +129,12 @@ for (( i=0; i<$NUM_NODES; i++ )); do
     # Create the secret keys for this node and other account details
     $GETH_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file"
 
-    # Initialize geth for this node
+    # Initialize geth for this node. Geth uses the genesis.json to write some initial state
     $GETH_BINARY init \
       --datadir=$NODE_DIR/execution \
       $NODE_DIR/execution/genesis.json
 
-    # Start geth for this node
+    # Start geth execution client for this node
     $GETH_BINARY \
       --networkid=${CHAIN_ID:-32382} \
       --http \
@@ -161,7 +163,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
 
     sleep 5
 
-    # Start prysm beacon for this node
+    # Start prysm consensus client for this node
     $PRYSM_BEACON_BINARY \
       --datadir=$NODE_DIR/consensus/beacondata \
       --min-sync-peers=$MIN_SYNC_PEERS \
