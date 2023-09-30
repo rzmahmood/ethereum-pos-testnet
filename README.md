@@ -13,7 +13,10 @@
 
 </div>
 
-This deployment process allows you to setup and deploy your own local ethereum PoS networks. Soon, you'll have the ability to configure the number of nodes you wish to run.
+This deployment process allows you to setup and deploy your own local ethereum PoS networks.
+This repository is targeted to developers who want to quickly modify client source code and deploy to a PoS network.
+This setup can is can serve as a reference for building your own production deployments but better solutions exist for [that](https://docs.kurtosis.com/how-to-compose-your-own-testnet/) use case.
+
 
 ## Installation
 This project utilizes Git submodules to reference the client code, notably Go-Ethereum and Prysm.
@@ -39,7 +42,7 @@ The script is idempotent and will clean up every time it is restarted.
 ```
 ![Generating a proof](./assets/runloop.gif)
 
-Reach out to me on Twitter @0xZorz if you have any issues. DMs are open
+Reach out to me on Twitter [@0xZorz](https://twitter.com/0xZorz) if you have any issues. DMs are open
 
 ## Acknowledgements
 
