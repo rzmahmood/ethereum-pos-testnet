@@ -15,7 +15,7 @@ mkdir -p $NETWORK_DIR/logs
 pkill geth || echo "No existing geth processes"
 
 GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
-PRYSM_CTL_BINARY=./dependencies/prysm-dev/out/prysmctl
+PRYSM_CTL_BINARY=./dependencies/prysm/out/prysmctl
 PRYSM_BEACON_BINARY=./dependencies/prysm/out/beacon-chain
 PRYSM_VALIDATOR_BINARY=./dependencies/prysm/out/validator
 

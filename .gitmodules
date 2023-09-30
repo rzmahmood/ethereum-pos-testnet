@@ -4,6 +4,3 @@
 [submodule "dependencies/prysm"]
 	path = dependencies/prysm
 	url = https://github.com/prysmaticlabs/prysm.git
-[submodule "dependencies/prysm-dev"]
-	path = dependencies/prysm-dev
-	url = https://github.com/prysmaticlabs/prysm.git
