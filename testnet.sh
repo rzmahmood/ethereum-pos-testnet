@@ -94,7 +94,7 @@ fi
 # Generate the genesis
 $PRYSM_CTL_BINARY testnet generate-genesis \
 --fork=capella \
---num-validators=64 \
+--num-validators=2 \
 --chain-config-file=./config.yml \
 --geth-genesis-json-in=./genesis.json \
 --output-ssz=$NETWORK_DIR/genesis.ssz \
@@ -186,6 +186,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --p2p-udp-port=$((PRYSM_BEACON_P2P_UDP_PORT + i)) \
       --monitoring-port=$((PRYSM_BEACON_MONITORING_PORT + i)) \
       --verbosity=info \
+      --slasher \
       --enable-debug-rpc-endpoints > "$NODE_DIR/logs/beacon.log" 2>&1 &
 
     # Start prysm validator for this node
@@ -198,6 +199,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --rpc-port=$((PRYSM_VALIDATOR_RPC_PORT + i)) \
       --grpc-gateway-port=$((PRYSM_VALIDATOR_GRPC_GATEWAY_PORT + i)) \
       --monitoring-port=$((PRYSM_VALIDATOR_MONITORING_PORT + i)) \
+      --graffiti="node-$i" \
       --chain-config-file=$NODE_DIR/consensus/config.yml > "$NODE_DIR/logs/validator.log" 2>&1 &
 
 
