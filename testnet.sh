@@ -91,10 +91,11 @@ else
 fi
 
 
-# Generate the genesis
+# Generate the genesis. This will generate  based
+# on https://github.com/ethereum/eth2.0-pm/blob/a085c9870f3956d6228ed2a40cd37f0c6580ecd7/interop/mocked_start/README.md
 $PRYSM_CTL_BINARY testnet generate-genesis \
 --fork=capella \
---num-validators=2 \
+--num-validators=$NUM_NODES \
 --chain-config-file=./config.yml \
 --geth-genesis-json-in=./genesis.json \
 --output-ssz=$NETWORK_DIR/genesis.ssz \
@@ -189,13 +190,14 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --slasher \
       --enable-debug-rpc-endpoints > "$NODE_DIR/logs/beacon.log" 2>&1 &
 
-    # Start prysm validator for this node
+    # Start prysm validator for this node. Each validator node will
+    # manage 1 validator
     $PRYSM_VALIDATOR_BINARY \
       --beacon-rpc-provider=localhost:$((PRYSM_BEACON_RPC_PORT + i)) \
       --datadir=$NODE_DIR/consensus/validatordata \
       --accept-terms-of-use \
-      --interop-num-validators=64 \
-      --interop-start-index=0 \
+      --interop-num-validators=1 \
+      --interop-start-index=$i \
       --rpc-port=$((PRYSM_VALIDATOR_RPC_PORT + i)) \
       --grpc-gateway-port=$((PRYSM_VALIDATOR_GRPC_GATEWAY_PORT + i)) \
       --monitoring-port=$((PRYSM_VALIDATOR_MONITORING_PORT + i)) \
