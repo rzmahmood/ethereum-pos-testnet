@@ -92,7 +92,6 @@ Reach out to me on Twitter [@0xZorz](https://twitter.com/0xZorz) if you have any
 
 ## Coming Soon
 - Deposits and Withdrawals
-- Slasher
 
 ## Acknowledgements
 
