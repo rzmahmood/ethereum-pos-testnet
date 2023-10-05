@@ -11,6 +11,8 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
+go version
+
 # Check fo version is greater than 1.20
 MIN_GO_VERSION="1.20"  # adjust this to your requirements
 GO_VERSION=$(go version | awk '{print $3}' | tr -d "go")
