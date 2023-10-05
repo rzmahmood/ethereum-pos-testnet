@@ -1,4 +1,4 @@
-name: Ethereum Testnet Setup
+name: Testnet Deployment CI
 
 on:
   push:
@@ -30,16 +30,9 @@ jobs:
       run: ./build-dependencies.sh
       
     - name: Start Testnet
-      run: ./testnet.sh &
-
-    - name: Wait for network to be ready
-      run: sleep 60   # Sleep for 60 seconds
+      run: |
+        ./testnet.sh &
+        sleep 60
 
     - name: Run Health check
       run: ./healthcheck.sh
-        
-    - name: Cleanup
-      if: always()
-      run: |
-        pkill -f geth
-        pkill -f prysm
