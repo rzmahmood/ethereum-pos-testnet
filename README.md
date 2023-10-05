@@ -29,7 +29,7 @@ git clone --recursive https://github.com/rzmahmood/ethereum-pos-testnet.git
 
 A helper script that builds the submodules, saving the binaries in a known path
 ```bash
-./build-dependencies
+./build-dependencies.sh
 ```
 
 ## Running
