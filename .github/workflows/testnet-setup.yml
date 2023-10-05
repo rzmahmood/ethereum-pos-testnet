@@ -1,0 +1,43 @@
+name: Ethereum Testnet Setup
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up Go 1.20
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.20
+
+    - name: Install JQ
+      run: sudo apt-get install jq
+
+    - name: Build dependencies
+      run: ./build-dependencies.sh
+      
+    - name: Start Testnet
+      run: ./testnet.sh
+
+    - name: Wait for network to be ready
+      run: sleep 60   # Sleep for 60 seconds
+
+    - name: Run Health check
+      run: ./healthcheck.sh
+        
+    - name: Cleanup
+      if: always()
+      run: |
+        pkill -f geth
+        pkill -f prysm
