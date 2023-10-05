@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  test:
+  testnet:
     runs-on: ubuntu-latest
     
     steps:
@@ -30,7 +30,7 @@ jobs:
       run: ./build-dependencies.sh
       
     - name: Start Testnet
-      run: ./testnet.sh
+      run: ./testnet.sh &
 
     - name: Wait for network to be ready
       run: sleep 60   # Sleep for 60 seconds
