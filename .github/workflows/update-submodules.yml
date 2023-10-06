@@ -2,7 +2,7 @@ name: Check for submodule releases
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Run once every day
+    - cron: '* * * * *' # Run once every minute (temporary while testing)
 
 jobs:
   check-submodule-release:
