@@ -1,8 +1,5 @@
 ![alt text](./assets//hero.png)
 
-> **Warning**
-> this code is new and will change in future versions. You should always read any scripts before running for security.
-
 <div align="center">
 
 # Deploy your own Local Ethereum PoS Testnet
