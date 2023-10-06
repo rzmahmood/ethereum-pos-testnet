@@ -1,8 +1,12 @@
 name: Check for submodule releases
 
 on:
-  schedule:
-    - cron: '* * * * *' # Run once every minute (temporary while testing)
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   check-submodule-release:
