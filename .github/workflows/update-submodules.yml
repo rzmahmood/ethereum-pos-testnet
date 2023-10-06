@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  check-submodule-release:
+  check-submodule-releases:
     runs-on: ubuntu-latest
 
     steps:
