@@ -16,7 +16,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        submodules: false # We'll handle submodule updates manually
+        submodules: 'recursive'
 
     - name: Check for new submodule release of go-ethereum
       run: |
