@@ -27,7 +27,7 @@ jobs:
         git fetch
         CURRENT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
         if [[ "$LATEST_GETH_RELEASE" != "$CURRENT_TAG" ]]; then
-          echo "There's a new release for the submodule: $LATEST_GETH_RELEASE"
+          echo "There's a new release for the submodule: $LATEST_GETH_RELEASE (current is $CURRENT_TAG)"
           echo "LATEST_GETH_RELEASE=$LATEST_GETH_RELEASE" >> $GITHUB_ENV
           echo "NEW_GETH_UPDATE=true" >> $GITHUB_ENV
         fi
@@ -50,12 +50,12 @@ jobs:
       run: |
         # Fetch the latest release tag from the submodule repo using the GitHub API
         LATEST_PRYSM_RELEASE=$(curl -s https://api.github.com/repos/ethereum/go-ethereum/releases/latest | jq -r .tag_name)
-        cd ./dependencies/go-ethereum
+        cd ./dependencies/prysm
         # Fetch and check the current checked-out tag for the submodule
         git fetch
         CURRENT_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
         if [[ "$LATEST_PRYSM_RELEASE" != "$CURRENT_TAG" ]]; then
-          echo "There's a new release for the submodule: $LATEST_PRYSM_RELEASE"
+          echo "There's a new release for the submodule: $LATEST_PRYSM_RELEASE (current is $CURRENT_TAG)"
           echo "LATEST_PRYSM_RELEASE=$LATEST_PRYSM_RELEASE" >> $GITHUB_ENV
           echo "NEW_PRYSM_UPDATE=true" >> $GITHUB_ENV
         fi
