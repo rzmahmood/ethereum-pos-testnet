@@ -92,6 +92,14 @@ Reach out to me on Twitter [@0xZorz](https://twitter.com/0xZorz) if you have any
 ## Coming Soon
 - Deposits and Withdrawals
 
+## FAQ / Common Issues
+- ```
+  go: cannot find main module, but found .git/config in /home/gopal/ethereum-pos-testnet
+        to create a module there, run:
+        cd ../.. && go mod init
+  ```
+  This occurs because the submodules were not cloned. Make sure to clone with the `--recursive` flag, i.e. `git clone --recursive https://github.com/rzmahmood/ethereum-pos-testnet.git`
+
 ## Acknowledgements
 
 - The [work](https://github.com/OffchainLabs/eth-pos-devnet) of Raul Jordan was a great reference starting point. His setup will suffice requirements that don't demand signficant customization and only require 1 node.
