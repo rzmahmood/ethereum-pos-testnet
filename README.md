@@ -100,6 +100,11 @@ Reach out to me on Twitter [@0xZorz](https://twitter.com/0xZorz) if you have any
   ```
   This occurs because the submodules were not cloned. Make sure to clone with the `--recursive` flag, i.e. `git clone --recursive https://github.com/rzmahmood/ethereum-pos-testnet.git`
 
+- ```
+  Nil finalized block cannot evict old blobs 
+  ```
+  This is expected log from Geth until a block is 'finalized'. The first finalized block will occur after 24 blocks.
+
 ## Acknowledgements
 
 - The [work](https://github.com/OffchainLabs/eth-pos-devnet) of Raul Jordan was a great reference starting point. His setup will suffice requirements that don't demand signficant customization and only require 1 node.
