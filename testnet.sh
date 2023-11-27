@@ -19,7 +19,7 @@ fi
 NETWORK_DIR=./network
 
 # Change this number for your desired number of nodes
-NUM_NODES=2
+NUM_NODES=1
 
 # Port information. All ports will be incremented upon
 # with more validators to prevent port conflicts on a single machine
@@ -64,9 +64,9 @@ pkill bootnode || echo "No existing bootnode processes"
 # if you're developing on a local fork of geth/prysm
 GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
 GETH_BOOTNODE_BINARY=./dependencies/go-ethereum/build/bin/bootnode
-PRYSM_CTL_BINARY=./dependencies/prysm/out/prysmctl
-PRYSM_BEACON_BINARY=./dependencies/prysm/out/beacon-chain
-PRYSM_VALIDATOR_BINARY=./dependencies/prysm/out/validator
+PRYSM_CTL_BINARY=../ethBFT/out/prysmctl
+PRYSM_BEACON_BINARY=../ethBFT/out/beacon-chain
+PRYSM_VALIDATOR_BINARY=../ethBFT/prysm/out/validator
 
 # Create the bootnode for execution client peer discovery. 
 # Not a production grade bootnode. Does not do peer discovery for consensus client
@@ -190,35 +190,35 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --slasher \
       --enable-debug-rpc-endpoints > "$NODE_DIR/logs/beacon.log" 2>&1 &
 
-    # Start prysm validator for this node. Each validator node will
-    # manage 1 validator
-    $PRYSM_VALIDATOR_BINARY \
-      --beacon-rpc-provider=localhost:$((PRYSM_BEACON_RPC_PORT + i)) \
-      --datadir=$NODE_DIR/consensus/validatordata \
-      --accept-terms-of-use \
-      --interop-num-validators=1 \
-      --interop-start-index=$i \
-      --rpc-port=$((PRYSM_VALIDATOR_RPC_PORT + i)) \
-      --grpc-gateway-port=$((PRYSM_VALIDATOR_GRPC_GATEWAY_PORT + i)) \
-      --monitoring-port=$((PRYSM_VALIDATOR_MONITORING_PORT + i)) \
-      --graffiti="node-$i" \
-      --chain-config-file=$NODE_DIR/consensus/config.yml > "$NODE_DIR/logs/validator.log" 2>&1 &
+    # # Start prysm validator for this node. Each validator node will
+    # # manage 1 validator
+    # $PRYSM_VALIDATOR_BINARY \
+    #   --beacon-rpc-provider=localhost:$((PRYSM_BEACON_RPC_PORT + i)) \
+    #   --datadir=$NODE_DIR/consensus/validatordata \
+    #   --accept-terms-of-use \
+    #   --interop-num-validators=1 \
+    #   --interop-start-index=$i \
+    #   --rpc-port=$((PRYSM_VALIDATOR_RPC_PORT + i)) \
+    #   --grpc-gateway-port=$((PRYSM_VALIDATOR_GRPC_GATEWAY_PORT + i)) \
+    #   --monitoring-port=$((PRYSM_VALIDATOR_MONITORING_PORT + i)) \
+    #   --graffiti="node-$i" \
+    #   --chain-config-file=$NODE_DIR/consensus/config.yml > "$NODE_DIR/logs/validator.log" 2>&1 &
 
 
-    # Check if the PRYSM_BOOTSTRAP_NODE variable is already set
-    if [[ -z "${PRYSM_BOOTSTRAP_NODE}" ]]; then
-        sleep 5 # sleep to let the prysm node set up
-        # If PRYSM_BOOTSTRAP_NODE is not set, execute the command and capture the result into the variable
-        # This allows subsequent nodes to discover the first node, treating it as the bootnode
-        PRYSM_BOOTSTRAP_NODE=$(curl -s localhost:4100/eth/v1/node/identity | jq -r '.data.enr')
-            # Check if the result starts with enr
-        if [[ $PRYSM_BOOTSTRAP_NODE == enr* ]]; then
-            echo "PRYSM_BOOTSTRAP_NODE is valid: $PRYSM_BOOTSTRAP_NODE"
-        else
-            echo "PRYSM_BOOTSTRAP_NODE does NOT start with enr"
-            exit 1
-        fi
-    fi
+    # # Check if the PRYSM_BOOTSTRAP_NODE variable is already set
+    # if [[ -z "${PRYSM_BOOTSTRAP_NODE}" ]]; then
+    #     sleep 5 # sleep to let the prysm node set up
+    #     # If PRYSM_BOOTSTRAP_NODE is not set, execute the command and capture the result into the variable
+    #     # This allows subsequent nodes to discover the first node, treating it as the bootnode
+    #     PRYSM_BOOTSTRAP_NODE=$(curl -s localhost:4100/eth/v1/node/identity | jq -r '.data.enr')
+    #         # Check if the result starts with enr
+    #     if [[ $PRYSM_BOOTSTRAP_NODE == enr* ]]; then
+    #         echo "PRYSM_BOOTSTRAP_NODE is valid: $PRYSM_BOOTSTRAP_NODE"
+    #     else
+    #         echo "PRYSM_BOOTSTRAP_NODE does NOT start with enr"
+    #         exit 1
+    #     fi
+    # fi
 done
 
 # You might want to change this if you want to tail logs for other nodes
