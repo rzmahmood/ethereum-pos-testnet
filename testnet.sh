@@ -62,7 +62,7 @@ pkill bootnode || echo "No existing bootnode processes"
 
 # Set Paths for your binaries. Configure as you wish, particularly
 # if you're developing on a local fork of geth/prysm
-GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
+GETH_BINARY=../../imtbl-go-ethereum/build/bin/geth
 GETH_BOOTNODE_BINARY=./dependencies/go-ethereum/build/bin/bootnode
 PRYSM_CTL_BINARY=../ethBFT/out/prysmctl
 PRYSM_BEACON_BINARY=../ethBFT/out/beacon-chain
@@ -136,31 +136,33 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       $NODE_DIR/execution/genesis.json
 
     # Start geth execution client for this node
-    $GETH_BINARY \
-      --networkid=${CHAIN_ID:-32382} \
-      --http \
-      --http.api=eth,net,web3 \
-      --http.addr=127.0.0.1 \
-      --http.corsdomain="*" \
-      --http.port=$((GETH_HTTP_PORT + i)) \
-      --port=$((GETH_NETWORK_PORT + i)) \
-      --metrics.port=$((GETH_METRICS_PORT + i)) \
-      --ws \
-      --ws.api=eth,net,web3 \
-      --ws.addr=127.0.0.1 \
-      --ws.origins="*" \
-      --ws.port=$((GETH_WS_PORT + i)) \
-      --authrpc.vhosts="*" \
-      --authrpc.addr=127.0.0.1 \
-      --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
-      --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
-      --datadir=$NODE_DIR/execution \
-      --password=$geth_pw_file \
-      --bootnodes=$bootnode_enode \
-      --identity=node-$i \
-      --maxpendpeers=$NUM_NODES \
-      --verbosity=3 \
-      --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+    # $GETH_BINARY \
+    #   --networkid=${CHAIN_ID:-32382} \
+    #   --http \
+    #   --http.api=eth,net,web3 \
+    #   --http.addr=127.0.0.1 \
+    #   --http.corsdomain="*" \
+    #   --http.port=$((GETH_HTTP_PORT + i)) \
+    #   --port=$((GETH_NETWORK_PORT + i)) \
+    #   --metrics.port=$((GETH_METRICS_PORT + i)) \
+    #   --ws \
+    #   --ws.api=eth,net,web3 \
+    #   --ws.addr=127.0.0.1 \
+    #   --ws.origins="*" \
+    #   --ws.port=$((GETH_WS_PORT + i)) \
+    #   --authrpc.vhosts="*" \
+    #   --authrpc.addr=127.0.0.1 \
+    #   --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
+    #   --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
+    #   --datadir=$NODE_DIR/execution \
+    #   --password=$geth_pw_file \
+    #   --bootnodes=$bootnode_enode \
+    #   --identity=node-$i \
+    #   --maxpendpeers=$NUM_NODES \
+    #   --verbosity=3 \
+    #   --mine \
+    #   --miner.etherbase 0x0Ddf6929d839EBe45514C80118151CbA0b16e562 \
+    #   --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
 
     sleep 5
 

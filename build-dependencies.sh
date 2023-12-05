@@ -23,7 +23,7 @@ fi
 
 
 PRYSM_DIR=../ethBFT
-GETH_DIR=./dependencies/go-ethereum
+GETH_DIR=../../imtbl-go-ethereum
 
 ( cd $PRYSM_DIR && go build -o=./out/beacon-chain ./cmd/beacon-chain && go build -o=./out/validator ./cmd/validator && go build -o=./out/prysmctl ./cmd/prysmctl )
 
