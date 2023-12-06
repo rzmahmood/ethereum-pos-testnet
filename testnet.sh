@@ -19,7 +19,7 @@ fi
 NETWORK_DIR=./network
 
 # Change this number for your desired number of nodes
-NUM_RPC_NODES=0
+NUM_RPC_NODES=1
 
 # Port information. All ports will be incremented upon
 # with more validators to prevent port conflicts on a single machine
@@ -89,21 +89,56 @@ echo "" > "$geth_pw_file"
 output=$($GETH_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file")
 
 # Extract the public address using grep and awk
-public_address=$(echo "$output" | grep -o 'Public address of the key:   0x[a-zA-Z0-9]*' | awk '{print $6}')
+public_address_original=$(echo "$output" | grep -o 'Public address of the key:   0x[a-zA-Z0-9]*' | awk '{print $6}')
 
 # Now you can use the public_address variable in your script
-echo "The public address for the validator is: $public_address"
+echo "The public address for the validator is: $public_address_original"
 
-# Format the address to be 64 characters long, padded with zeros
-formatted_address=$(printf "%-64s" "$public_address")
+# Remove the '0x' prefix and convert to lower case
+public_address=$(echo $public_address_original | tr '[:upper:]' '[:lower:]')
+public_address=${public_address#0x}
+
+# Format the address with 32 zero bytes before (64 zero characters) and 65 zero bytes after (130 zero characters)
+formatted_address=0x$(printf '0%.0s' {1..64})$public_address$(printf '0%.0s' {1..130})
 
 # Update the extradata field in the genesis file (clique specific)
-jq --arg address "$formatted_address" '.extradata = $address' "./genesis.json" > tmp.json && mv tmp.json "./genesis.json"
+jq --arg address "$formatted_address" '.extraData = $address' "./genesis.json" > tmp.json && mv tmp.json "./genesis.json"
 
 cp ./genesis.json $NETWORK_DIR/genesis.json
 
+# Copy the same genesis and inital config the node's directories
+# All nodes must have the same genesis otherwise they will reject eachother
+cp $NETWORK_DIR/genesis.json $NODE_DIR/execution/genesis.json
+
+# Initialize geth for this node. Geth uses the genesis.json to write some initial state
+$GETH_BINARY init \
+    --datadir=$NODE_DIR/execution \
+    $NODE_DIR/execution/genesis.json
+
+# Start geth execution client for this node
+    $GETH_BINARY \
+    --networkid=${CHAIN_ID:-32382} \
+    --port=$GETH_NETWORK_PORT \
+    --metrics.port=$GETH_METRICS_PORT \
+    --authrpc.vhosts="*" \
+    --authrpc.addr=127.0.0.1 \
+    --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
+    --authrpc.port=$GETH_AUTH_RPC_PORT \
+    --datadir=$NODE_DIR/execution \
+    --password=$geth_pw_file \
+    --bootnodes=$bootnode_enode \
+    --identity=node-0 \
+    --maxpendpeers=$((NUM_RPC_NODES + 1)) \
+    --verbosity=3 \
+    --mine \
+    --miner.etherbase=$public_address_original \
+    --unlock=$public_address_original \
+    --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+
+sleep 5
+
 # Create the RPC nodes
-for (( i=0; i<$NUM_RPC_NODES; i++ )); do
+for (( i=1; i<$((NUM_RPC_NODES + 1)); i++ )); do
     NODE_DIR=$NETWORK_DIR/node-$i
     mkdir -p $NODE_DIR/execution
     mkdir -p $NODE_DIR/consensus
@@ -118,15 +153,7 @@ for (( i=0; i<$NUM_RPC_NODES; i++ )); do
     cp $NETWORK_DIR/genesis.json $NODE_DIR/execution/genesis.json
 
     # Create the secret keys for this node and other account details
-    # Run the geth command and capture its output
-    output=$($GETH_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file")
-
-    # Extract the public address using grep and awk
-    public_address=$(echo "$output" | grep -o 'Public address of the key:   0x[a-zA-Z0-9]*' | awk '{print $6}')
-
-    # Now you can use the public_address variable in your script
-    echo "The public address is: $public_address"
-
+    $GETH_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file"
 
     # Initialize geth for this node. Geth uses the genesis.json to write some initial state
     $GETH_BINARY init \
@@ -156,13 +183,10 @@ for (( i=0; i<$NUM_RPC_NODES; i++ )); do
       --password=$geth_pw_file \
       --bootnodes=$bootnode_enode \
       --identity=node-$i \
-      --maxpendpeers=$NUM_NODES \
+      --maxpendpeers=$((NUM_RPC_NODES + 1)) \
       --verbosity=3 \
-      --mine \
-      --miner.etherbase "$public_address" \
       --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
 done
 
 # You might want to change this if you want to tail logs for other nodes
-# Logs for all nodes can be found in `./network/node-*/logs`
-tail -f "$NETWORK_DIR/node-0/logs/geth.log"
+tail -f "$NETWORK_DIR/validator/logs/geth.log"
