@@ -6,7 +6,7 @@
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#experimental)
-![testnet-deployment](https://github.com/rzmahmood/ethereum-pos-testnet/actions/workflows/testnet-deployment.yml/badge.svg)
+![testnet-deployment](https://github.com/rzmahmood/ethereum-pos-testnet/actions/workflows/testnet-deployment.yml/badge.svg) [![Ceasefire Now](https://badge.techforpalestine.org/default)](https://techforpalestine.org/learn-more)
 
 
 </div>
