@@ -11,6 +11,12 @@ if ! command -v go &> /dev/null; then
     exit 1
 fi
 
+# Check if bazel is installed (see https://docs.prylabs.network/docs/install/install-with-bazel#install-bazel-using-bazelisk)
+if ! command -v bazel &> /dev/null; then
+    echo "Error: bazel is not installed. Please install bazel first. See https://docs.prylabs.network/docs/install/install-with-bazel#install-bazel-using-bazelisk"
+    exit 1
+fi
+
 go version
 
 # Check fo version is greater than 1.20
@@ -25,6 +31,6 @@ fi
 PRYSM_DIR=./dependencies/prysm
 GETH_DIR=./dependencies/go-ethereum
 
-( cd $PRYSM_DIR && go build -o=./out/beacon-chain ./cmd/beacon-chain && go build -o=./out/validator ./cmd/validator && go build -o=./out/prysmctl ./cmd/prysmctl )
+( cd $PRYSM_DIR && bazel build //cmd/beacon-chain:beacon-chain --config=release && bazel build //cmd/validator:validator --config=release && bazel build //cmd/prysmctl:prysmctl --config=release )
 
 ( cd $GETH_DIR && make all )
