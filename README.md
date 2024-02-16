@@ -6,7 +6,7 @@
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](https://github.com/mkenney/software-guides/blob/master/STABILITY-BADGES.md#experimental)
-![testnet-deployment](https://github.com/rzmahmood/ethereum-pos-testnet/actions/workflows/testnet-deployment.yml/badge.svg)
+![testnet-deployment](https://github.com/rzmahmood/ethereum-pos-testnet/actions/workflows/testnet-deployment.yml/badge.svg) [![Ceasefire Now](https://badge.techforpalestine.org/default)](https://techforpalestine.org/learn-more)
 
 
 </div>
@@ -20,7 +20,7 @@ This setup can is can serve as a reference for building your own production depl
 This project utilizes Git submodules to reference the client code, notably Go-Ethereum and Prysm.
 However, the scripts can be configured to reference binaries you build locally, making development quicker.
 
- **You will need Go 1.20 and JQ installed**. 
+ **You will need Go 1.20, JQ and Bazel installed**. 
 
 ```bash
 git clone --recursive https://github.com/rzmahmood/ethereum-pos-testnet.git
