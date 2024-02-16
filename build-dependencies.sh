@@ -31,6 +31,6 @@ fi
 PRYSM_DIR=./dependencies/prysm
 GETH_DIR=./dependencies/go-ethereum
 
-( cd $PRYSM_DIR && bazel build //cmd/beacon-chain:beacon-chain --config=release && bazel build //cmd/validator:validator --config=release && bazel build //cmd/prysmctl:prysmctl --config=release )
+( cd $PRYSM_DIR && bazel build //cmd/beacon-chain:beacon-chain && bazel build //cmd/validator:validator && bazel build //cmd/prysmctl:prysmctl )
 
 ( cd $GETH_DIR && make all )
