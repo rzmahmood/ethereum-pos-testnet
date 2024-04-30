@@ -160,7 +160,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --bootnodes=$bootnode_enode \
       --identity=node-$i \
       --maxpendpeers=$NUM_NODES \
-      --verbosity=3 \
+      --verbosity=4 \
       --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
 
     sleep 5
