@@ -20,7 +20,7 @@ fi
 go version
 
 # Check fo version is greater than 1.20
-MIN_GO_VERSION="1.20"  # adjust this to your requirements
+MIN_GO_VERSION="1.21"  # adjust this to your requirements
 GO_VERSION=$(go version | awk '{print $3}' | tr -d "go")
 if [[ $(echo "$MIN_GO_VERSION $GO_VERSION" | tr " " "\n" | sort -V | head -n 1) != "$MIN_GO_VERSION" ]]; then
     echo "Error: Go version $GO_VERSION is installed, but version $MIN_GO_VERSION or higher is required."
@@ -28,9 +28,9 @@ if [[ $(echo "$MIN_GO_VERSION $GO_VERSION" | tr " " "\n" | sort -V | head -n 1) 
 fi
 
 
-PRYSM_DIR=./dependencies/prysm
+PRYSM_DIR=../ethBFT
 GETH_DIR=./dependencies/go-ethereum
 
-( cd $PRYSM_DIR && bazel build //cmd/beacon-chain:beacon-chain && bazel build //cmd/validator:validator && bazel build //cmd/prysmctl:prysmctl )
+( cd $PRYSM_DIR && go build -o ./build/beacon-chain ./cmd/beacon-chain/ )
 
 ( cd $GETH_DIR && make all )
