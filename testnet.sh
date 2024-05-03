@@ -190,36 +190,6 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --verbosity=info \
       --slasher \
       --enable-debug-rpc-endpoints > "$NODE_DIR/logs/beacon.log" 2>&1 &
-
-    # Start prysm validator for this node. Each validator node will
-    # manage 1 validator
-    # $PRYSM_VALIDATOR_BINARY \
-    #   --beacon-rpc-provider=localhost:$((PRYSM_BEACON_RPC_PORT + i)) \
-    #   --datadir=$NODE_DIR/consensus/validatordata \
-    #   --accept-terms-of-use \
-    #   --interop-num-validators=1 \
-    #   --interop-start-index=$i \
-    #   --rpc-port=$((PRYSM_VALIDATOR_RPC_PORT + i)) \
-    #   --grpc-gateway-port=$((PRYSM_VALIDATOR_GRPC_GATEWAY_PORT + i)) \
-    #   --monitoring-port=$((PRYSM_VALIDATOR_MONITORING_PORT + i)) \
-    #   --graffiti="node-$i" \
-    #   --chain-config-file=$NODE_DIR/consensus/config.yml > "$NODE_DIR/logs/validator.log" 2>&1 &
-
-
-    # # Check if the PRYSM_BOOTSTRAP_NODE variable is already set
-    # if [[ -z "${PRYSM_BOOTSTRAP_NODE}" ]]; then
-    #     sleep 10 # sleep to let the prysm node set up
-    #     # If PRYSM_BOOTSTRAP_NODE is not set, execute the command and capture the result into the variable
-    #     # This allows subsequent nodes to discover the first node, treating it as the bootnode
-    #     PRYSM_BOOTSTRAP_NODE=$(cat validator-enr)
-    #         # Check if the result starts with enr
-    #     if [[ $PRYSM_BOOTSTRAP_NODE == enr* ]]; then
-    #         echo "PRYSM_BOOTSTRAP_NODE is valid: $PRYSM_BOOTSTRAP_NODE"
-    #     else
-    #         echo "PRYSM_BOOTSTRAP_NODE does NOT start with enr"
-    #         exit 1
-    #     fi
-    # fi
 done
 
 # You might want to change this if you want to tail logs for other nodes
