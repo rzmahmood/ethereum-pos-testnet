@@ -20,7 +20,7 @@ This setup can is can serve as a reference for building your own production depl
 This project utilizes Git submodules to reference the client code, notably Go-Ethereum and Prysm.
 However, the scripts can be configured to reference binaries you build locally, making development quicker.
 
- **You will need Go 1.20, JQ and Bazel installed**. 
+ **You will need Go 1.21, JQ and Bazel installed**. 
 
 ```bash
 git clone --recursive https://github.com/rzmahmood/ethereum-pos-testnet.git
