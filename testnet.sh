@@ -66,9 +66,10 @@ pkill bootnode || echo "No existing bootnode processes"
 
 # Set Paths for your binaries. Configure as you wish, particularly
 # if you're developing on a local fork of geth/prysm
-GETH_ORIGINAL_BINARY=./dependencies/go-ethereum/build/bin/geth
-GETH_BINARY=../erigon-zero/build/bin/erigon
+GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
 GETH_BOOTNODE_BINARY=./dependencies/go-ethereum/build/bin/bootnode
+
+ERIGON_BINARY=../erigon-zero/build/bin/erigon
 
 PRYSM_CTL_BINARY=../ethBFT/bazel-bin/cmd/prysmctl/prysmctl_/prysmctl
 PRYSM_BEACON_BINARY=../ethBFT/build/beacon-chain
@@ -134,33 +135,67 @@ for (( i=0; i<$NUM_NODES; i++ )); do
     cp $NETWORK_DIR/genesis.json $NODE_DIR/execution/genesis.json
 
     # Create the secret keys for this node and other account details
-    $GETH_ORIGINAL_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file"
+    $GETH_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file"
 
-    # Initialize geth for this node. Geth uses the genesis.json to write some initial state
-    $GETH_BINARY init \
-      --datadir=$NODE_DIR/execution \
-      $NODE_DIR/execution/genesis.json
+    # for all nodes after the first, make them erigon nodes
+    if [ $i -gt 0 ]; then
+        # Initialize erigon for this node. Erigon uses the genesis.json to write some initial state
+        $ERIGON_BINARY init \
+            --datadir=$NODE_DIR/execution \
+            $NODE_DIR/execution/genesis.json
 
-    # Start geth execution client for this node
-    $GETH_BINARY \
-      --networkid=${CHAIN_ID:-32382} \
-      --http \
-      --http.api=eth,net,web3 \
-      --http.addr=127.0.0.1 \
-      --http.corsdomain="*" \
-      --http.port=$((GETH_HTTP_PORT + i)) \
-      --port=$((GETH_NETWORK_PORT + i)) \
-      --metrics.port=$((GETH_METRICS_PORT + i)) \
-      --authrpc.vhosts="*" \
-      --authrpc.addr=127.0.0.1 \
-      --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
-      --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
-      --datadir=$NODE_DIR/execution \
-      --bootnodes=$bootnode_enode \
-      --identity=node-$i \
-      --torrent.port=$((ERIGON_TORRENT_PORT + i)) \
-      --private.api.addr=127.0.0.1:$((ERIGON_PRIVATE_API_PORT + i)) \
-      --verbosity=4 > "$NODE_DIR/logs/geth.log" 2>&1 &
+        # Start erigon execution client for this node
+        $ERIGON_BINARY \
+            --networkid=${CHAIN_ID:-32382} \
+            --http \
+            --http.api=eth,net,web3 \
+            --http.addr=127.0.0.1 \
+            --http.corsdomain="*" \
+            --http.port=$((GETH_HTTP_PORT + i)) \
+            --port=$((GETH_NETWORK_PORT + i)) \
+            --metrics.port=$((GETH_METRICS_PORT + i)) \
+            --authrpc.vhosts="*" \
+            --authrpc.addr=127.0.0.1 \
+            --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
+            --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
+            --datadir=$NODE_DIR/execution \
+            --bootnodes=$bootnode_enode \
+            --identity=node-$i \
+            --torrent.port=$((ERIGON_TORRENT_PORT + i)) \
+            --private.api.addr=127.0.0.1:$((ERIGON_PRIVATE_API_PORT + i)) \
+            --verbosity=4 > "$NODE_DIR/logs/geth.log" 2>&1 &
+    else
+        # Initialize geth for this node. Geth uses the genesis.json to write some initial state
+        $GETH_BINARY init \
+            --datadir=$NODE_DIR/execution \
+            $NODE_DIR/execution/genesis.json
+
+        $GETH_BINARY \
+            --networkid=${CHAIN_ID:-32382} \
+            --http \
+            --http.api=eth,net,web3 \
+            --http.addr=127.0.0.1 \
+            --http.corsdomain="*" \
+            --http.port=$((GETH_HTTP_PORT + i)) \
+            --port=$((GETH_NETWORK_PORT + i)) \
+            --metrics.port=$((GETH_METRICS_PORT + i)) \
+            --ws \
+            --ws.api=eth,net,web3 \
+            --ws.addr=127.0.0.1 \
+            --ws.origins="*" \
+            --ws.port=$((GETH_WS_PORT + i)) \
+            --authrpc.vhosts="*" \
+            --authrpc.addr=127.0.0.1 \
+            --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
+            --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
+            --datadir=$NODE_DIR/execution \
+            --password=$geth_pw_file \
+            --bootnodes=$bootnode_enode \
+            --identity=node-$i \
+            --maxpendpeers=$NUM_NODES \
+            --verbosity=3 \
+            --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+    fi
 
     sleep 5
 
