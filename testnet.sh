@@ -31,6 +31,10 @@ GETH_AUTH_RPC_PORT=8200
 GETH_METRICS_PORT=8300
 GETH_NETWORK_PORT=8400
 
+ERIGON_TORRENT_PORT=8500
+ERIGON_PRIVATE_API_PORT=8600
+ERIGON_P2P_PROTOCOL_PORT=8700
+
 PRYSM_BEACON_RPC_PORT=4000
 PRYSM_BEACON_GRPC_GATEWAY_PORT=4100
 PRYSM_BEACON_P2P_TCP_PORT=4200
@@ -62,7 +66,8 @@ pkill bootnode || echo "No existing bootnode processes"
 
 # Set Paths for your binaries. Configure as you wish, particularly
 # if you're developing on a local fork of geth/prysm
-GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
+GETH_ORIGINAL_BINARY=./dependencies/go-ethereum/build/bin/geth
+GETH_BINARY=../erigon-zero/build/bin/erigon
 GETH_BOOTNODE_BINARY=./dependencies/go-ethereum/build/bin/bootnode
 
 PRYSM_CTL_BINARY=../ethBFT/bazel-bin/cmd/prysmctl/prysmctl_/prysmctl
@@ -129,7 +134,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
     cp $NETWORK_DIR/genesis.json $NODE_DIR/execution/genesis.json
 
     # Create the secret keys for this node and other account details
-    $GETH_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file"
+    $GETH_ORIGINAL_BINARY account new --datadir "$NODE_DIR/execution" --password "$geth_pw_file"
 
     # Initialize geth for this node. Geth uses the genesis.json to write some initial state
     $GETH_BINARY init \
@@ -146,22 +151,16 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       --http.port=$((GETH_HTTP_PORT + i)) \
       --port=$((GETH_NETWORK_PORT + i)) \
       --metrics.port=$((GETH_METRICS_PORT + i)) \
-      --ws \
-      --ws.api=eth,net,web3 \
-      --ws.addr=127.0.0.1 \
-      --ws.origins="*" \
-      --ws.port=$((GETH_WS_PORT + i)) \
       --authrpc.vhosts="*" \
       --authrpc.addr=127.0.0.1 \
       --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
       --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
       --datadir=$NODE_DIR/execution \
-      --password=$geth_pw_file \
       --bootnodes=$bootnode_enode \
       --identity=node-$i \
-      --maxpendpeers=$NUM_NODES \
-      --verbosity=4 \
-      --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+      --torrent.port=$((ERIGON_TORRENT_PORT + i)) \
+      --private.api.addr=127.0.0.1:$((ERIGON_PRIVATE_API_PORT + i)) \
+      --verbosity=4 > "$NODE_DIR/logs/geth.log" 2>&1 &
 
     sleep 5
 
