@@ -31,6 +31,6 @@ fi
 PRYSM_DIR=../ethBFT
 GETH_DIR=./dependencies/go-ethereum
 
-( cd $PRYSM_DIR && go build -o ./build/beacon-chain ./cmd/beacon-chain/ )
+( cd $PRYSM_DIR && go build -o ./build/beacon-chain ./cmd/beacon-chain/ && go build -o ./build/prysmctl ./cmd/prysmctl/ )
 
 ( cd $GETH_DIR && make all )

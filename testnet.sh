@@ -65,9 +65,8 @@ pkill bootnode || echo "No existing bootnode processes"
 GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
 GETH_BOOTNODE_BINARY=./dependencies/go-ethereum/build/bin/bootnode
 
-PRYSM_CTL_BINARY=../ethBFT/bazel-bin/cmd/prysmctl/prysmctl_/prysmctl
+PRYSM_CTL_BINARY=../ethBFT/build/prysmctl
 PRYSM_BEACON_BINARY=../ethBFT/build/beacon-chain
-PRYSM_VALIDATOR_BINARY=../ethBFT/bazel-bin/cmd/validator/validator_/validator
 
 # Create the bootnode for execution client peer discovery. 
 # Not a production grade bootnode. Does not do peer discovery for consensus client
