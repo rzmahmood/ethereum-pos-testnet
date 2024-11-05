@@ -41,6 +41,11 @@
 		},
 		"fe8664457176d0f87eaabd103aba410855f81010": {
 			"balance": "0x21e19e0c9bab2400000"
+		},
+		"000F3df6D732807Ef1319fB7B8bB8522d0Beac02": {
+			"nonce": 1,
+			"balance": "0x0",
+			"code": "0x3373fffffffffffffffffffffffffffffffffffffffe14604d57602036146024575f5ffd5b5f35801560495762001fff810690815414603c575f5ffd5b62001fff01545f5260205ff35b5f5ffd5b62001fff42064281555f359062001fff015500"
 		}
 	},
 	"number": "0x0",
