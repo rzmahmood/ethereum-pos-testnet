@@ -18,10 +18,10 @@ jobs:
       with:
         submodules: 'recursive'
       
-    - name: Set up Go 1.21.9
+    - name: Set up Go 1.23.0
       uses: actions/setup-go@v4
       with:
-        go-version: '1.21.9'
+        go-version: '1.23.0'
 
     - name: Install JQ
       run: sudo apt-get install jq
