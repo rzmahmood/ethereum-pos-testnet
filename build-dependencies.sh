@@ -19,8 +19,8 @@ fi
 
 go version
 
-# Check fo version is greater than 1.21
-MIN_GO_VERSION="1.23"  # adjust this to your requirements
+# Check for version is greater than 1.23
+MIN_GO_VERSION="1.23"
 GO_VERSION=$(go version | awk '{print $3}' | tr -d "go")
 if [[ $(echo "$MIN_GO_VERSION $GO_VERSION" | tr " " "\n" | sort -V | head -n 1) != "$MIN_GO_VERSION" ]]; then
     echo "Error: Go version $GO_VERSION is installed, but version $MIN_GO_VERSION or higher is required."
