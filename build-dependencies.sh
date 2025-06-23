@@ -30,7 +30,10 @@ fi
 
 PRYSM_DIR=./dependencies/prysm
 GETH_DIR=./dependencies/go-ethereum
+ETH_BEACON_GENESIS_DIR=./dependencies/eth-beacon-genesis
 
 ( cd $PRYSM_DIR && bazel build //cmd/beacon-chain:beacon-chain && bazel build //cmd/validator:validator && bazel build //cmd/prysmctl:prysmctl )
 
 ( cd $GETH_DIR && make all )
+
+( cd $ETH_BEACON_GENESIS_DIR && go build -o eth-beacon-genesis ./cmd/eth-beacon-genesis )

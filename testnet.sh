@@ -72,63 +72,32 @@ PRYSM_VALIDATOR_BINARY=./dependencies/prysm/bazel-bin/cmd/validator/validator_/v
 GETH_BOOTNODE_ENODE=
 
 
-# Generate the genesis using ethereum-genesis-generator (like Kurtosis/ethpandaops)
-# This approach avoids all configuration conflicts with Prysm v6.x
-mkdir -p $NETWORK_DIR/genesis-config
+# Generate genesis using ethpandaops approach (industry standard)
+# This approach is proven to work with Prysm v6.0.4
+ETH_BEACON_GENESIS_BINARY=./dependencies/eth-beacon-genesis/eth-beacon-genesis
 
-# Create minimal genesis configuration
-cat > $NETWORK_DIR/genesis-config/values.env << EOF
-SECONDS_PER_SLOT=2
-SLOTS_PER_EPOCH=32
-GENESIS_FORK_VERSION=0x10000038
-ALTAIR_FORK_VERSION=0x20000038
-BELLATRIX_FORK_VERSION=0x30000038
-CAPELLA_FORK_VERSION=0x40000038
-DENEB_FORK_VERSION=0x50000038
-ELECTRA_FORK_VERSION=0x60000038
-ALTAIR_FORK_EPOCH=0
-BELLATRIX_FORK_EPOCH=0
-CAPELLA_FORK_EPOCH=0
-DENEB_FORK_EPOCH=0
-ELECTRA_FORK_EPOCH=0
-CHAIN_ID=32382
-DEPOSIT_CONTRACT_ADDRESS=0x4242424242424242424242424242424242424242
-NUMBER_OF_VALIDATORS=$NUM_NODES
-GENESIS_DELAY=10
+# Create validator mnemonics file  
+cat > $NETWORK_DIR/mnemonics.yaml << EOF
+- mnemonic: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+  start: 0
+  count: $NUM_NODES
+  wd_address: null
+  wd_prefix: "0x00"
+  balance: 32000000000
 EOF
 
-# Use simplified approach that works with Prysm v6.0.4
-# Create minimal config inline to avoid conflicts
-cat > $NETWORK_DIR/config.yaml << EOF
-CONFIG_NAME: minimal-local
-PRESET_BASE: minimal
+# Generate consensus layer genesis using eth-beacon-genesis (the ethpandaops way)
+$ETH_BEACON_GENESIS_BINARY devnet \
+  --config=./ethpandaops-config.yml \
+  --eth1-config=./genesis.json \
+  --mnemonics=$NETWORK_DIR/mnemonics.yaml \
+  --state-output=$NETWORK_DIR/genesis.ssz
 
-SECONDS_PER_SLOT: 2
-SLOTS_PER_EPOCH: 32
+# Copy the original execution genesis for geth nodes
+cp ./genesis.json $NETWORK_DIR/genesis.json
 
-GENESIS_FORK_VERSION: 0x10000038
-ALTAIR_FORK_VERSION: 0x20000038
-ALTAIR_FORK_EPOCH: 0
-BELLATRIX_FORK_VERSION: 0x30000038
-BELLATRIX_FORK_EPOCH: 0
-CAPELLA_FORK_VERSION: 0x40000038
-CAPELLA_FORK_EPOCH: 0
-DENEB_FORK_VERSION: 0x50000038
-DENEB_FORK_EPOCH: 0
-
-TERMINAL_TOTAL_DIFFICULTY: 0
-DEPOSIT_CONTRACT_ADDRESS: 0x4242424242424242424242424242424242424242
-MAX_WITHDRAWALS_PER_PAYLOAD: 16
-EOF
-
-# Generate genesis using the clean config
-$PRYSM_CTL_BINARY testnet generate-genesis \
---fork=deneb \
---num-validators=$NUM_NODES \
---chain-config-file=$NETWORK_DIR/config.yaml \
---geth-genesis-json-in=./genesis.json \
---output-ssz=$NETWORK_DIR/genesis.ssz \
---geth-genesis-json-out=$NETWORK_DIR/genesis.json
+# Copy the ethpandaops config for nodes to use
+cp ./ethpandaops-config.yml $NETWORK_DIR/config.yaml
 
 
 # The prysm bootstrap node is set after the first loop, as the first
