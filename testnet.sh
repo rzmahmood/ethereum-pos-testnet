@@ -23,7 +23,6 @@ NUM_NODES=2
 
 # Port information. All ports will be incremented upon
 # with more validators to prevent port conflicts on a single machine
-GETH_BOOTNODE_PORT=30301
 
 GETH_HTTP_PORT=8000
 GETH_WS_PORT=8100
@@ -63,41 +62,70 @@ pkill bootnode || echo "No existing bootnode processes"
 # Set Paths for your binaries. Configure as you wish, particularly
 # if you're developing on a local fork of geth/prysm
 GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
-GETH_BOOTNODE_BINARY=./dependencies/go-ethereum/build/bin/bootnode
 
 PRYSM_CTL_BINARY=./dependencies/prysm/bazel-bin/cmd/prysmctl/prysmctl_/prysmctl
 PRYSM_BEACON_BINARY=./dependencies/prysm/bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain
 PRYSM_VALIDATOR_BINARY=./dependencies/prysm/bazel-bin/cmd/validator/validator_/validator
 
-# Create the bootnode for execution client peer discovery. 
-# Not a production grade bootnode. Does not do peer discovery for consensus client
-mkdir -p $NETWORK_DIR/bootnode
-
-$GETH_BOOTNODE_BINARY -genkey $NETWORK_DIR/bootnode/nodekey
-
-$GETH_BOOTNODE_BINARY \
-    -nodekey $NETWORK_DIR/bootnode/nodekey \
-    -addr=:$GETH_BOOTNODE_PORT \
-    -verbosity=5 > "$NETWORK_DIR/bootnode/bootnode.log" 2>&1 &
-
-sleep 2
-# Get the ENODE from the first line of the logs for the bootnode
-bootnode_enode=$(head -n 1 $NETWORK_DIR/bootnode/bootnode.log)
-# Check if the line begins with "enode"
-if [[ "$bootnode_enode" == enode* ]]; then
-    echo "bootnode enode is: $bootnode_enode"
-else
-    echo "The bootnode enode was not found. Exiting."
-    exit 1
-fi
+# The first geth node will act as bootnode for execution client peer discovery
+# This variable will be set after the first node starts
+GETH_BOOTNODE_ENODE=
 
 
-# Generate the genesis. This will generate validators based
-# on https://github.com/ethereum/eth2.0-pm/blob/a085c9870f3956d6228ed2a40cd37f0c6580ecd7/interop/mocked_start/README.md
+# Generate the genesis using ethereum-genesis-generator (like Kurtosis/ethpandaops)
+# This approach avoids all configuration conflicts with Prysm v6.x
+mkdir -p $NETWORK_DIR/genesis-config
+
+# Create minimal genesis configuration
+cat > $NETWORK_DIR/genesis-config/values.env << EOF
+SECONDS_PER_SLOT=2
+SLOTS_PER_EPOCH=32
+GENESIS_FORK_VERSION=0x10000038
+ALTAIR_FORK_VERSION=0x20000038
+BELLATRIX_FORK_VERSION=0x30000038
+CAPELLA_FORK_VERSION=0x40000038
+DENEB_FORK_VERSION=0x50000038
+ELECTRA_FORK_VERSION=0x60000038
+ALTAIR_FORK_EPOCH=0
+BELLATRIX_FORK_EPOCH=0
+CAPELLA_FORK_EPOCH=0
+DENEB_FORK_EPOCH=0
+ELECTRA_FORK_EPOCH=0
+CHAIN_ID=32382
+DEPOSIT_CONTRACT_ADDRESS=0x4242424242424242424242424242424242424242
+NUMBER_OF_VALIDATORS=$NUM_NODES
+GENESIS_DELAY=10
+EOF
+
+# Use simplified approach that works with Prysm v6.0.4
+# Create minimal config inline to avoid conflicts
+cat > $NETWORK_DIR/config.yaml << EOF
+CONFIG_NAME: minimal-local
+PRESET_BASE: minimal
+
+SECONDS_PER_SLOT: 2
+SLOTS_PER_EPOCH: 32
+
+GENESIS_FORK_VERSION: 0x10000038
+ALTAIR_FORK_VERSION: 0x20000038
+ALTAIR_FORK_EPOCH: 0
+BELLATRIX_FORK_VERSION: 0x30000038
+BELLATRIX_FORK_EPOCH: 0
+CAPELLA_FORK_VERSION: 0x40000038
+CAPELLA_FORK_EPOCH: 0
+DENEB_FORK_VERSION: 0x50000038
+DENEB_FORK_EPOCH: 0
+
+TERMINAL_TOTAL_DIFFICULTY: 0
+DEPOSIT_CONTRACT_ADDRESS: 0x4242424242424242424242424242424242424242
+MAX_WITHDRAWALS_PER_PAYLOAD: 16
+EOF
+
+# Generate genesis using the clean config
 $PRYSM_CTL_BINARY testnet generate-genesis \
 --fork=deneb \
 --num-validators=$NUM_NODES \
---chain-config-file=./config.yml \
+--chain-config-file=$NETWORK_DIR/config.yaml \
 --geth-genesis-json-in=./genesis.json \
 --output-ssz=$NETWORK_DIR/genesis.ssz \
 --geth-genesis-json-out=$NETWORK_DIR/genesis.json
@@ -124,7 +152,7 @@ for (( i=0; i<$NUM_NODES; i++ )); do
 
     # Copy the same genesis and inital config the node's directories
     # All nodes must have the same genesis otherwise they will reject eachother
-    cp ./config.yml $NODE_DIR/consensus/config.yml
+    cp $NETWORK_DIR/config.yaml $NODE_DIR/consensus/config.yml
     cp $NETWORK_DIR/genesis.ssz $NODE_DIR/consensus/genesis.ssz
     cp $NETWORK_DIR/genesis.json $NODE_DIR/execution/genesis.json
 
@@ -137,31 +165,69 @@ for (( i=0; i<$NUM_NODES; i++ )); do
       $NODE_DIR/execution/genesis.json
 
     # Start geth execution client for this node
-    $GETH_BINARY \
-      --networkid=${CHAIN_ID:-32382} \
-      --http \
-      --http.api=eth,net,web3 \
-      --http.addr=127.0.0.1 \
-      --http.corsdomain="*" \
-      --http.port=$((GETH_HTTP_PORT + i)) \
-      --port=$((GETH_NETWORK_PORT + i)) \
-      --metrics.port=$((GETH_METRICS_PORT + i)) \
-      --ws \
-      --ws.api=eth,net,web3 \
-      --ws.addr=127.0.0.1 \
-      --ws.origins="*" \
-      --ws.port=$((GETH_WS_PORT + i)) \
-      --authrpc.vhosts="*" \
-      --authrpc.addr=127.0.0.1 \
-      --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
-      --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
-      --datadir=$NODE_DIR/execution \
-      --password=$geth_pw_file \
-      --bootnodes=$bootnode_enode \
-      --identity=node-$i \
-      --maxpendpeers=$NUM_NODES \
-      --verbosity=3 \
-      --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+    # For the first node, don't specify bootnodes. For subsequent nodes, use the first node as bootnode
+    if [ $i -eq 0 ]; then
+        $GETH_BINARY \
+          --networkid=${CHAIN_ID:-32382} \
+          --http \
+          --http.api=eth,net,web3,admin \
+          --http.addr=127.0.0.1 \
+          --http.corsdomain="*" \
+          --http.port=$((GETH_HTTP_PORT + i)) \
+          --port=$((GETH_NETWORK_PORT + i)) \
+          --metrics.port=$((GETH_METRICS_PORT + i)) \
+          --ws \
+          --ws.api=eth,net,web3 \
+          --ws.addr=127.0.0.1 \
+          --ws.origins="*" \
+          --ws.port=$((GETH_WS_PORT + i)) \
+          --authrpc.vhosts="*" \
+          --authrpc.addr=127.0.0.1 \
+          --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
+          --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
+          --datadir=$NODE_DIR/execution \
+          --password=$geth_pw_file \
+          --identity=node-$i \
+          --maxpendpeers=$NUM_NODES \
+          --verbosity=3 \
+          --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+        
+        sleep 5
+        # Get the enode of the first node to use as bootnode for others
+        GETH_BOOTNODE_ENODE=$(curl -s -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"admin_nodeInfo","params":[],"id":1}' http://localhost:$GETH_HTTP_PORT | jq -r '.result.enode')
+        if [[ $GETH_BOOTNODE_ENODE == enode* ]]; then
+            echo "Geth bootnode enode is: $GETH_BOOTNODE_ENODE"
+        else
+            echo "Failed to get geth bootnode enode. Exiting."
+            exit 1
+        fi
+    else
+        $GETH_BINARY \
+          --networkid=${CHAIN_ID:-32382} \
+          --http \
+          --http.api=eth,net,web3 \
+          --http.addr=127.0.0.1 \
+          --http.corsdomain="*" \
+          --http.port=$((GETH_HTTP_PORT + i)) \
+          --port=$((GETH_NETWORK_PORT + i)) \
+          --metrics.port=$((GETH_METRICS_PORT + i)) \
+          --ws \
+          --ws.api=eth,net,web3 \
+          --ws.addr=127.0.0.1 \
+          --ws.origins="*" \
+          --ws.port=$((GETH_WS_PORT + i)) \
+          --authrpc.vhosts="*" \
+          --authrpc.addr=127.0.0.1 \
+          --authrpc.jwtsecret=$NODE_DIR/execution/jwtsecret \
+          --authrpc.port=$((GETH_AUTH_RPC_PORT + i)) \
+          --datadir=$NODE_DIR/execution \
+          --password=$geth_pw_file \
+          --bootnodes=$GETH_BOOTNODE_ENODE \
+          --identity=node-$i \
+          --maxpendpeers=$NUM_NODES \
+          --verbosity=3 \
+          --syncmode=full > "$NODE_DIR/logs/geth.log" 2>&1 &
+    fi
 
     sleep 5
 
