@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# NOTE: THIS SCRIPT WAS TESTED WITH GOLANG 1.20 installed
+# NOTE: THIS SCRIPT WAS TESTED WITH GOLANG 1.23 installed
 
 set -exu
 set -o pipefail
@@ -8,12 +8,6 @@ set -o pipefail
 # Check if go is installed
 if ! command -v go &> /dev/null; then
     echo "Error: go is not installed. Please install Go first."
-    exit 1
-fi
-
-# Check if bazel is installed (see https://docs.prylabs.network/docs/install/install-with-bazel#install-bazel-using-bazelisk)
-if ! command -v bazel &> /dev/null; then
-    echo "Error: bazel is not installed. Please install bazel first. See https://docs.prylabs.network/docs/install/install-with-bazel#install-bazel-using-bazelisk"
     exit 1
 fi
 
@@ -32,8 +26,18 @@ PRYSM_DIR=./dependencies/prysm
 GETH_DIR=./dependencies/go-ethereum
 ETH_BEACON_GENESIS_DIR=./dependencies/eth-beacon-genesis
 
-( cd $PRYSM_DIR && bazel build //cmd/beacon-chain:beacon-chain && bazel build //cmd/validator:validator && bazel build //cmd/prysmctl:prysmctl )
+# Build Prysm using Go instead of Bazel for simpler local development
+echo "Building Prysm beacon-chain..."
+( cd $PRYSM_DIR && go build -tags develop -o beacon-chain ./cmd/beacon-chain )
 
+echo "Building Prysm validator..."
+( cd $PRYSM_DIR && go build -tags develop -o validator ./cmd/validator )
+
+echo "Building Prysm prysmctl..."
+( cd $PRYSM_DIR && go build -tags develop -o prysmctl ./cmd/prysmctl )
+
+echo "Building Go-Ethereum..."
 ( cd $GETH_DIR && make all )
 
+echo "Building eth-beacon-genesis..."
 ( cd $ETH_BEACON_GENESIS_DIR && go build -o eth-beacon-genesis ./cmd/eth-beacon-genesis )
