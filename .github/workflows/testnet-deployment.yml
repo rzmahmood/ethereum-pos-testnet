@@ -26,6 +26,9 @@ jobs:
     - name: Install JQ
       run: sudo apt-get install jq
 
+    - name: Install Bazel
+      uses: bazelbuild/setup-bazelisk@v3
+
     - name: Build dependencies
       run: ./build-dependencies.sh
       

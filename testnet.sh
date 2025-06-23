@@ -63,9 +63,9 @@ pkill bootnode || echo "No existing bootnode processes"
 # if you're developing on a local fork of geth/prysm
 GETH_BINARY=./dependencies/go-ethereum/build/bin/geth
 
-PRYSM_CTL_BINARY=./dependencies/prysm/prysmctl
-PRYSM_BEACON_BINARY=./dependencies/prysm/beacon-chain
-PRYSM_VALIDATOR_BINARY=./dependencies/prysm/validator
+PRYSM_CTL_BINARY=./dependencies/prysm/bazel-bin/cmd/prysmctl/prysmctl_/prysmctl
+PRYSM_BEACON_BINARY=./dependencies/prysm/bazel-bin/cmd/beacon-chain/beacon-chain_/beacon-chain
+PRYSM_VALIDATOR_BINARY=./dependencies/prysm/bazel-bin/cmd/validator/validator_/validator
 
 # The first geth node will act as bootnode for execution client peer discovery
 # This variable will be set after the first node starts
