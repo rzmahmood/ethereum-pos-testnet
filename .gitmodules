@@ -4,3 +4,6 @@
 [submodule "dependencies/prysm"]
 	path = dependencies/prysm
 	url = https://github.com/prysmaticlabs/prysm.git
+[submodule "dependencies/eth-beacon-genesis"]
+	path = dependencies/eth-beacon-genesis
+	url = https://github.com/ethpandaops/eth-beacon-genesis
