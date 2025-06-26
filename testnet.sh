@@ -105,7 +105,8 @@ cp ./ethpandaops-config.yml $NETWORK_DIR/config.yaml
 PRYSM_BOOTSTRAP_NODE=
 
 # Calculate how many nodes to wait for to be in sync with. Not a hard rule
-MIN_SYNC_PEERS=$((NUM_NODES/2))
+# For local testnets, we set this to 0 so nodes can start producing blocks immediately
+MIN_SYNC_PEERS=0
 echo $MIN_SYNC_PEERS is minimum number of synced peers required
 
 # Create the validators in a loop
