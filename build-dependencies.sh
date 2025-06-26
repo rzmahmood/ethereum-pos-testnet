@@ -13,7 +13,7 @@ fi
 
 # Check if bazel is installed (see https://docs.prylabs.network/docs/install/install-with-bazel#install-bazel-using-bazelisk)
 if ! command -v bazel &> /dev/null; then
-    echo "Error: bazel is not installed. Please install bazel first. See https://docs.prylabs.network/docs/install/install-with-bazel#install-bazel-using-bazelisk"
+    echo "Error: bazel is not installed. Please install bazelisk first: brew install bazelisk (or see https://github.com/bazelbuild/bazelisk#installation)"
     exit 1
 fi
 

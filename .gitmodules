@@ -6,4 +6,4 @@
 	url = https://github.com/prysmaticlabs/prysm.git
 [submodule "dependencies/eth-beacon-genesis"]
 	path = dependencies/eth-beacon-genesis
-	url = https://github.com/ethpandaops/ethereum-genesis-generator
+	url = https://github.com/ethpandaops/eth-beacon-genesis
